@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carnicería con IA — Tablero de proyecto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF8F0;
+    --surface: #FFFFFF;
+    --surface-elev: #FFFFFF;
+    --border-subtle: #F0E5D2;
+    --border: #E2D2B6;
+    --border-strong: #C9B596;
+    --text: #1F1612;
+    --text-secondary: #6B5F52;
+    --text-muted: #9B8E80;
+    --shadow-sm: 0 1px 2px rgba(31, 22, 18, 0.04);
+    --shadow-md: 0 4px 12px rgba(31, 22, 18, 0.06);
+    --shadow-lg: 0 12px 32px rgba(31, 22, 18, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  .app {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 40px 100px;
+  }
+
+  /* ==== Masthead ==== */
+  .masthead {
+    margin-bottom: 36px;
+  }
+
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
+    margin-bottom: 36px;
+  }
+
+  .project-info { flex: 1; min-width: 0; }
+
+  .project-name {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: clamp(40px, 6vw, 64px);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .project-subtitle {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    line-height: 1.3;
+  }
+
+  /* Level badge */
+  .level-card {
+    background: linear-gradient(135deg, #FF6B35 0%, #F4A800 100%);
+    color: #FFFFFF;
+    padding: 16px 22px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    min-width: 220px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .level-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.25) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .level-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    margin-bottom: 4px;
+    position: relative;
+  }
+
+  .level-name {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    position: relative;
+  }
+
+  .level-next {
+    font-size: 11px;
+    margin-top: 6px;
+    opacity: 0.85;
+    font-family: 'JetBrains Mono', monospace;
+    position: relative;
+  }
+
+  /* ==== Progress hero ==== */
+  .progress-hero {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .progress-main { min-width: 0; }
+
+  .progress-numbers {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .progress-big {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 72px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #FF6B35 0%, #EC4899 60%, #7C3AED 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  .progress-big .pct {
+    font-size: 38px;
+    -webkit-text-fill-color: var(--text-secondary);
+    color: var(--text-secondary);
+    background: none;
+  }
+
+  .progress-counts {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding-bottom: 8px;
+  }
+
+  .progress-bar-big {
+    height: 8px;
+    background: var(--border-subtle);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-top: 16px;
+    position: relative;
+  }
+
+  .progress-bar-big-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF6B35 0%, #EC4899 60%, #7C3AED 100%);
+    border-radius: 100px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+  }
+
+  .progress-bar-big-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+    animation: shimmer 2.4s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .stat {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--text);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .stat-value .unit {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .stat-value .flame {
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+
+  /* Achievements */
+  .achievements-section {
+    margin-top: 28px;
+    padding: 22px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+  }
+
+  .achievements-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .achievements-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .achievements-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .achievements-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    border: 1px solid;
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .badge[data-unlocked="true"] {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .badge[data-unlocked="false"] {
+    background: var(--bg);
+    color: var(--text-muted);
+    border-color: var(--border-subtle);
+    border-style: dashed;
+    opacity: 0.7;
+  }
+
+  .badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ==== Phases ==== */
+  .phases { margin-top: 48px; }
+
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    transition: all 0.3s;
+    box-shadow: var(--shadow-sm);
+    border-top: 4px solid var(--phase-color, var(--border));
+  }
+
+  .phase:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .phase[data-complete="true"] {
+    background: linear-gradient(135deg, var(--surface) 0%, color-mix(in srgb, var(--phase-color) 6%, var(--surface)) 100%);
+  }
+
+  .phase-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
+    padding: 28px 32px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .phase-header:hover {
+    background: color-mix(in srgb, var(--phase-color) 3%, transparent);
+  }
+
+  .phase-info { flex: 1; min-width: 0; }
+
+  .phase-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--phase-color);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .phase-label .label-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--phase-color);
+  }
+
+  .phase-title {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+
+  .phase-title .toggle-caret {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--text-muted);
+    transition: transform 0.25s;
+  }
+
+  .phase[data-collapsed="true"] .toggle-caret {
+    transform: rotate(-90deg);
+  }
+
+  .phase-subtitle {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    font-size: 17px;
+  }
+
+  .phase-stat {
+    text-align: right;
+    min-width: 200px;
+  }
+
+  .phase-pct-big {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--phase-color);
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .phase-pct-big .pct-symbol {
+    font-size: 22px;
+    opacity: 0.7;
+  }
+
+  .phase-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .phase-bar {
+    height: 4px;
+    background: var(--border-subtle);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-top: 10px;
+    width: 180px;
+    margin-left: auto;
+  }
+
+  .phase-bar-fill {
+    height: 100%;
+    background: var(--phase-color);
+    border-radius: 100px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .phase-complete-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 10px;
+    background: var(--phase-color);
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 100px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Tasks */
+  .task-list {
+    padding: 0 32px 8px;
+  }
+
+  .task {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .task:last-of-type {
+    border-bottom: none;
+  }
+
+  .task:hover {
+    padding-left: 4px;
+  }
+
+  .task-indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    background: var(--surface);
+    flex-shrink: 0;
+    margin-top: 3px;
+    position: relative;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .task-indicator:hover {
+    transform: scale(1.15);
+    border-color: var(--phase-color);
+  }
+
+  .task[data-status="in_progress"] .task-indicator {
+    border-color: var(--phase-color);
+    background: linear-gradient(90deg, var(--phase-color) 50%, var(--surface) 50%);
+  }
+
+  .task[data-status="done"] .task-indicator {
+    border-color: var(--phase-color);
+    background: var(--phase-color);
+    animation: pop 0.3s ease-out;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+
+  .task[data-status="done"] .task-indicator::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 5px;
+    width: 8px;
+    height: 4px;
+    border-left: 2px solid #FFFFFF;
+    border-bottom: 2px solid #FFFFFF;
+    transform: rotate(-45deg);
+  }
+
+  .task-text {
+    flex: 1;
+    color: var(--text);
+    font-size: 15px;
+    cursor: text;
+    transition: color 0.2s;
+    padding-top: 1px;
+    line-height: 1.5;
+  }
+
+  .task[data-status="done"] .task-text {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--text-muted);
+    text-decoration-thickness: 1px;
+  }
+
+  .task[data-status="in_progress"] .task-text {
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+
+  .task-actions {
+    opacity: 0;
+    display: flex;
+    gap: 4px;
+    transition: opacity 0.15s;
+  }
+
+  .task:hover .task-actions {
+    opacity: 1;
+  }
+
+  .task-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 10px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    border-radius: 4px;
+    transition: all 0.15s;
+    letter-spacing: 0.02em;
+  }
+
+  .task-action:hover {
+    color: var(--phase-color);
+    background: color-mix(in srgb, var(--phase-color) 8%, transparent);
+  }
+
+  /* Edit / add input */
+  .task-edit-input,
+  .add-task-input {
+    flex: 1;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1.5px solid var(--phase-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--phase-color) 12%, transparent);
+  }
+
+  .add-task-row {
+    margin-top: 6px;
+    padding: 12px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .add-task-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: inherit;
+    font-style: italic;
+    padding: 4px 0;
+    transition: color 0.15s;
+  }
+
+  .add-task-btn:hover {
+    color: var(--phase-color);
+  }
+
+  /* Collapsed phase */
+  .phase[data-collapsed="true"] .task-list,
+  .phase[data-collapsed="true"] .add-task-row {
+    display: none;
+  }
+
+  /* Add phase */
+  .add-phase-row {
+    text-align: center;
+    padding: 28px 0;
+  }
+
+  .add-phase-btn {
+    background: none;
+    border: 1.5px dashed var(--border-strong);
+    color: var(--text-muted);
+    padding: 14px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-style: italic;
+    transition: all 0.2s;
+  }
+
+  .add-phase-btn:hover {
+    color: #FF6B35;
+    border-color: #FF6B35;
+    background: color-mix(in srgb, #FF6B35 5%, transparent);
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .footer-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .footer-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    transition: all 0.15s;
+  }
+
+  .footer-btn:hover {
+    color: #FF6B35;
+    border-color: #FF6B35;
+  }
+
+  /* Loading state */
+  .loading {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-muted);
+    font-style: italic;
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 20px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 12px 22px;
+    border-radius: 100px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Achievement notification */
+  .achievement-pop {
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    background: linear-gradient(135deg, #FF6B35 0%, #EC4899 100%);
+    color: #FFFFFF;
+    padding: 16px 24px;
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    transform: translateX(380px);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+    max-width: 340px;
+  }
+
+  .achievement-pop.show {
+    transform: translateX(0);
+  }
+
+  .achievement-pop-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    margin-bottom: 4px;
+  }
+
+  .achievement-pop-title {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .achievement-pop-desc {
+    font-size: 13px;
+    margin-top: 4px;
+    opacity: 0.95;
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 8px;
+    height: 12px;
+    pointer-events: none;
+    border-radius: 1px;
+    z-index: 999;
+    animation: confettiFall 1.4s cubic-bezier(0.16, 0.84, 0.44, 1) forwards;
+  }
+
+  @keyframes confettiFall {
+    0% {
+      transform: translate(0, 0) rotate(0deg) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--tx), calc(var(--ty) + 240px)) rotate(var(--rot)) scale(0.8);
+      opacity: 0;
+    }
+  }
+
+  /* Phase complete celebration ring */
+  @keyframes phasePulse {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--phase-color) 50%, transparent); }
+    70% { box-shadow: 0 0 0 24px color-mix(in srgb, var(--phase-color) 0%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--phase-color) 0%, transparent); }
+  }
+
+  .phase.celebrating {
+    animation: phasePulse 1s ease-out;
+  }
+
+  @media (max-width: 760px) {
+    .app { padding: 28px 20px 60px; }
+    .masthead-top { flex-direction: column; }
+    .level-card { min-width: 0; width: 100%; }
+    .progress-hero { grid-template-columns: 1fr; gap: 28px; padding: 24px; }
+    .phase-header { flex-direction: column; gap: 16px; padding: 22px 24px; }
+    .phase-stat { text-align: left; min-width: 0; }
+    .phase-bar { margin-left: 0; }
+    .task-list { padding: 0 24px 8px; }
+    .progress-big { font-size: 56px; }
+    .phase-title { font-size: 26px; }
+    .footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<h2 class="sr-only">Tablero gamificado del proyecto Carnicería con IA</h2>
+<div class="app">
+  <div id="content" class="loading">cargando proyecto…</div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="achievement-pop" id="achievementPop"></div>
+
+<script>
+const STORAGE_KEY = 'butcher-project:state-v2';
+
+/* ============ STORAGE ABSTRACTION ============ */
+// Uses window.storage when available (inside Claude artifacts),
+// falls back to localStorage when deployed externally.
+const storage = {
+  async get(key) {
+    if (typeof window.storage !== 'undefined') {
+      try {
+        const r = await window.storage.get(key);
+        return r ? r.value : null;
+      } catch (e) {
+        return null;
+      }
+    }
+    try {
+      return window.localStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  },
+  async set(key, value) {
+    if (typeof window.storage !== 'undefined') {
+      try {
+        await window.storage.set(key, value);
+        return;
+      } catch (e) {
+        console.warn('window.storage failed, falling back', e);
+      }
+    }
+    try {
+      window.localStorage.setItem(key, value);
+    } catch (e) {
+      console.error('localStorage failed', e);
+    }
+  }
+};
+
+/* ============ SEED ============ */
+const PHASE_COLORS = {
+  'fase-0': '#FF6B35',
+  'fase-a': '#25D366',
+  'operacion': '#F4A800',
+  'decision': '#7C3AED',
+  'fase-b': '#EC4899',
+  'fase-c': '#06B6D4'
+};
+
+const SEED_PROJECT = {
+  name: "Carnicería con IA",
+  subtitle: "De WhatsApp bot a marketplace consumidor",
+  meta: {
+    lastActiveDate: null,
+    currentStreak: 0,
+    bestStreak: 0,
+    achievementsUnlocked: [],
+    tasksCompletedToday: 0,
+    todayDate: null
+  },
+  phases: [
+    {
+      id: "fase-0", number: "Fase 0", title: "Fundaciones técnicas", subtitle: "3-4 semanas",
+      color: "#FF6B35", collapsed: false,
+      tasks: [
+        { id: "f0-01", title: "Definir alcance del proyecto y endgame (e-commerce de un operador, no marketplace plataforma)", status: "done" },
+        { id: "f0-02", title: "Decidir stack tecnológico (Supabase + Next.js + Tailwind + shadcn/ui + Vercel)", status: "done" },
+        { id: "f0-03", title: "Definir tipos de productos del catálogo inicial (cortes, embutidos, preparadas)", status: "done" },
+        { id: "f0-04", title: "Definir modalidades de entrega (recolección + domicilio)", status: "done" },
+        { id: "f0-05", title: "Definir métodos de pago a soportar (efectivo, SPEI, terminal, en línea)", status: "done" },
+        { id: "f0-06", title: "Diseñar schema de base de datos (ERD completo con 10 entidades)", status: "done" },
+        { id: "f0-07", title: "Decidir estrategia de variantes de producto (JSONB attributes)", status: "done" },
+        { id: "f0-08", title: "Definir estrategia de aliases por producto para el AI", status: "done" },
+        { id: "f0-09", title: "Establecer principios: vendor_id, dinero en cents, snapshots en order_items", status: "done" },
+        { id: "f0-10", title: "Generar migraciones SQL ejecutables para Supabase", status: "pending" },
+        { id: "f0-11", title: "Crear proyecto en Supabase y aplicar migraciones", status: "pending" },
+        { id: "f0-12", title: "Configurar Row-Level Security (RLS) en todas las tablas", status: "pending" },
+        { id: "f0-13", title: "Crear proyecto Next.js base con Tailwind y shadcn/ui", status: "pending" },
+        { id: "f0-14", title: "Configurar autenticación del gerente en el dashboard", status: "pending" },
+        { id: "f0-15", title: "Poblar catálogo inicial con cortes reales de la carnicería", status: "pending" },
+        { id: "f0-16", title: "Instrumentar event log y empezar a registrar eventos del sistema", status: "pending" }
+      ]
+    },
+    {
+      id: "fase-a", number: "Fase A", title: "WhatsApp bot + Dashboard", subtitle: "6-8 semanas",
+      color: "#25D366", collapsed: false,
+      tasks: [
+        { id: "fa-01", title: "Aplicar a WhatsApp Business API (Meta Cloud API)", status: "pending" },
+        { id: "fa-02", title: "Configurar webhook de WhatsApp para recibir mensajes", status: "pending" },
+        { id: "fa-03", title: "Implementar parser de pedidos con Claude tool_use y schema JSON", status: "pending" },
+        { id: "fa-04", title: "Implementar disambiguador de catálogo (matching contra aliases y SKUs)", status: "pending" },
+        { id: "fa-05", title: "Implementar clasificador de escalamiento (reglas + LLM)", status: "pending" },
+        { id: "fa-06", title: "Implementar generador de confirmaciones en tono carnicería", status: "pending" },
+        { id: "fa-07", title: "Dashboard: vista de órdenes entrantes con filtros y estado", status: "pending" },
+        { id: "fa-08", title: "Dashboard: detalle de orden con edición línea por línea", status: "pending" },
+        { id: "fa-09", title: "Sistema de escalamientos: notificación al gerente vía WhatsApp", status: "pending" },
+        { id: "fa-10", title: "Confirmación automática al cliente cuando gerente aprueba", status: "pending" },
+        { id: "fa-11", title: "CRUD del catálogo en el dashboard (productos, variantes, aliases)", status: "pending" },
+        { id: "fa-12", title: "Vista de clientes con historial y perfil enriquecido", status: "pending" },
+        { id: "fa-13", title: "Asistente del gerente en dashboard (chat con Claude sobre datos)", status: "pending" },
+        { id: "fa-14", title: "Métricas básicas en dashboard (volumen, tiempo, precisión, escalamiento)", status: "pending" },
+        { id: "fa-15", title: "Pruebas con pedidos reales antes de liberar a producción", status: "pending" }
+      ]
+    },
+    {
+      id: "operacion", number: "Operación", title: "Operación y medición", subtitle: "3-6 meses en producción real",
+      color: "#F4A800", collapsed: false,
+      tasks: [
+        { id: "op-01", title: "Definir umbrales de validación POR ESCRITO antes de soltar", status: "pending" },
+        { id: "op-02", title: "Despliegue del sistema con el gerente como único usuario inicial", status: "pending" },
+        { id: "op-03", title: "Instrumentar las 10 métricas clave del sistema", status: "pending" },
+        { id: "op-04", title: "Iterar parser y aliases basado en pedidos reales semana a semana", status: "pending" },
+        { id: "op-05", title: "Encuesta NPS simple post-pedido (1-5)", status: "pending" },
+        { id: "op-06", title: "Reporte mensual de métricas comparado contra umbrales", status: "pending" },
+        { id: "op-07", title: "Documentar fricciones del gerente para iterar el dashboard", status: "pending" }
+      ]
+    },
+    {
+      id: "decision", number: "Decisión", title: "¿Las métricas validan invertir en Fase B?", subtitle: "Punto de decisión mes 6",
+      color: "#7C3AED", collapsed: false,
+      tasks: [
+        { id: "d-01", title: "Revisar volumen por canal vs. umbral definido", status: "pending" },
+        { id: "d-02", title: "Revisar precisión del bot vs. umbral definido", status: "pending" },
+        { id: "d-03", title: "Revisar ahorro de tiempo del gerente vs. umbral", status: "pending" },
+        { id: "d-04", title: "Revisar NPS y satisfacción del cliente", status: "pending" },
+        { id: "d-05", title: "Decisión documentada: ¿avanzar a Fase B o iterar Fase A?", status: "pending" }
+      ]
+    },
+    {
+      id: "fase-b", number: "Fase B", title: "Telefonía con voz clonada", subtitle: "12-16 semanas",
+      color: "#EC4899", collapsed: true,
+      tasks: [
+        { id: "fb-01", title: "Obtener consentimiento por escrito del gerente para clonar voz", status: "pending" },
+        { id: "fb-02", title: "Grabar 30-45 min de audio del gerente para entrenamiento", status: "pending" },
+        { id: "fb-03", title: "Crear Professional Voice Clone en ElevenLabs", status: "pending" },
+        { id: "fb-04", title: "Prueba piloto con 5 clientes habituales antes de invertir más", status: "pending" },
+        { id: "fb-05", title: "Configurar número telefónico con Twilio Voice", status: "pending" },
+        { id: "fb-06", title: "Integrar STT (Deepgram o Whisper) optimizado para español MX", status: "pending" },
+        { id: "fb-07", title: "Construir orquestador de conversación con latencia <800ms", status: "pending" },
+        { id: "fb-08", title: "Detector de cliente recurrente al inicio de llamada", status: "pending" },
+        { id: "fb-09", title: "Flujo de escalamiento durante llamada (asíncrono vía WhatsApp)", status: "pending" },
+        { id: "fb-10", title: "Disclosure obligatorio al inicio: 'le habla la asistente virtual de...'", status: "pending" },
+        { id: "fb-11", title: "Validar UX con clientes mayores antes de despliegue general", status: "pending" },
+        { id: "fb-12", title: "Despliegue gradual: 25% → 50% → 100% de llamadas", status: "pending" }
+      ]
+    },
+    {
+      id: "fase-c", number: "Fase C", title: "E-commerce expandido", subtitle: "Catálogo amplio + app del consumidor",
+      color: "#06B6D4", collapsed: true,
+      tasks: [
+        { id: "fc-01", title: "Expandir catálogo a categorías más allá de carne", status: "pending" },
+        { id: "fc-02", title: "Integrar pasarela de pago en línea (Stripe o MercadoPago)", status: "pending" },
+        { id: "fc-03", title: "Integrar Uber Direct API para logística de entrega", status: "pending" },
+        { id: "fc-04", title: "Diseñar app consumidor (decidir web responsive vs móvil nativa)", status: "pending" },
+        { id: "fc-05", title: "Construir app del consumidor con búsqueda semántica", status: "pending" },
+        { id: "fc-06", title: "Recomendador personalizado basado en historial del cliente", status: "pending" },
+        { id: "fc-07", title: "Generador de campañas WhatsApp con consentimiento opt-in", status: "pending" }
+      ]
+    }
+  ]
+};
+
+/* ============ LEVELS & ACHIEVEMENTS ============ */
+const LEVELS = [
+  { min: 0, name: "Recién llegado" },
+  { min: 8, name: "Aprendiz constructor" },
+  { min: 20, name: "Constructor" },
+  { min: 35, name: "Lanzador" },
+  { min: 50, name: "Operador en vivo" },
+  { min: 65, name: "Estratega" },
+  { min: 80, name: "Casi cierre" },
+  { min: 95, name: "Maestro" }
+];
+
+const ACHIEVEMENTS = [
+  { id: 'first_step', title: 'Primer paso', desc: 'Completaste tu primera tarea',
+    check: s => totalDone(s) >= 1 },
+  { id: 'getting_started', title: 'En marcha', desc: 'Cinco tareas completadas',
+    check: s => totalDone(s) >= 5 },
+  { id: 'momentum', title: 'Con impulso', desc: 'Diez tareas completadas',
+    check: s => totalDone(s) >= 10 },
+  { id: 'unstoppable', title: 'Imparable', desc: 'Veinticinco tareas completadas',
+    check: s => totalDone(s) >= 25 },
+  { id: 'half_way', title: 'Mitad de camino', desc: 'Cincuenta por ciento del proyecto',
+    check: s => overallProgress(s) >= 50 },
+  { id: 'foundations', title: 'Fundaciones listas', desc: 'Fase 0 completa',
+    check: s => phaseComplete(s, 'fase-0') },
+  { id: 'bot_alive', title: 'Bot vivo', desc: 'Fase A completa',
+    check: s => phaseComplete(s, 'fase-a') },
+  { id: 'validated', title: 'Validador', desc: 'Operación y medición completa',
+    check: s => phaseComplete(s, 'operacion') },
+  { id: 'voice_live', title: 'Voz al aire', desc: 'Fase B completa',
+    check: s => phaseComplete(s, 'fase-b') },
+  { id: 'marketplace_live', title: 'Marketplace lanzado', desc: 'Fase C completa',
+    check: s => phaseComplete(s, 'fase-c') },
+  { id: 'streak_3', title: 'Racha de 3', desc: 'Tres días consecutivos avanzando',
+    check: s => s.meta.currentStreak >= 3 || s.meta.bestStreak >= 3 },
+  { id: 'streak_7', title: 'Racha de 7', desc: 'Una semana entera avanzando',
+    check: s => s.meta.currentStreak >= 7 || s.meta.bestStreak >= 7 },
+  { id: 'productive_day', title: 'Día productivo', desc: 'Cinco tareas en un solo día',
+    check: s => s.meta.tasksCompletedToday >= 5 },
+  { id: 'mastery', title: 'Proyecto completo', desc: 'Cien por ciento alcanzado',
+    check: s => overallProgress(s) >= 100 }
+];
+
+/* ============ STATE ============ */
+let state = null;
+let toastTimer = null;
+let achievementTimer = null;
+
+async function loadState() {
+  try {
+    const value = await storage.get(STORAGE_KEY);
+    if (value) {
+      const parsed = JSON.parse(value);
+      // Migrate phase colors if missing
+      parsed.phases.forEach(p => {
+        if (!p.color && PHASE_COLORS[p.id]) p.color = PHASE_COLORS[p.id];
+      });
+      if (!parsed.meta) {
+        parsed.meta = { lastActiveDate: null, currentStreak: 0, bestStreak: 0, achievementsUnlocked: [], tasksCompletedToday: 0, todayDate: null };
+      }
+      return parsed;
+    }
+  } catch (e) {
+    // fall through
+  }
+  return JSON.parse(JSON.stringify(SEED_PROJECT));
+}
+
+async function saveState() {
+  try {
+    await storage.set(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    showToast('error al guardar');
+    console.error('Save failed', e);
+  }
+}
+
+/* ============ CALCS ============ */
+function totalDone(s) {
+  return s.phases.flatMap(p => p.tasks).filter(t => t.status === 'done').length;
+}
+function totalInProgress(s) {
+  return s.phases.flatMap(p => p.tasks).filter(t => t.status === 'in_progress').length;
+}
+function totalTasks(s) {
+  return s.phases.flatMap(p => p.tasks).length;
+}
+function phaseProgress(phase) {
+  if (!phase.tasks.length) return 0;
+  const score = phase.tasks.reduce((acc, t) => {
+    if (t.status === 'done') return acc + 1;
+    if (t.status === 'in_progress') return acc + 0.5;
+    return acc;
+  }, 0);
+  return Math.round((score / phase.tasks.length) * 100);
+}
+function overallProgress(s) {
+  const all = s.phases.flatMap(p => p.tasks);
+  if (!all.length) return 0;
+  const score = all.reduce((acc, t) => {
+    if (t.status === 'done') return acc + 1;
+    if (t.status === 'in_progress') return acc + 0.5;
+    return acc;
+  }, 0);
+  return Math.round((score / all.length) * 100);
+}
+function phaseComplete(s, phaseId) {
+  const p = s.phases.find(ph => ph.id === phaseId);
+  return p && p.tasks.length > 0 && p.tasks.every(t => t.status === 'done');
+}
+function currentLevel(progress) {
+  return LEVELS.slice().reverse().find(l => progress >= l.min) || LEVELS[0];
+}
+function nextLevel(progress) {
+  return LEVELS.find(l => progress < l.min);
+}
+
+/* ============ STREAK ============ */
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function yesterdayStr() {
+  const d = new Date(); d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function checkStreakDecay() {
+  // If user hasn't been active for more than 1 day, reset streak counter visually
+  const today = todayStr();
+  const last = state.meta.lastActiveDate;
+  if (last && last !== today && last !== yesterdayStr()) {
+    state.meta.currentStreak = 0;
+  }
+  // Reset today counter if it's a new day
+  if (state.meta.todayDate !== today) {
+    state.meta.todayDate = today;
+    state.meta.tasksCompletedToday = 0;
+  }
+}
+
+function recordActivity(isDone) {
+  const today = todayStr();
+  const last = state.meta.lastActiveDate;
+
+  if (state.meta.todayDate !== today) {
+    state.meta.todayDate = today;
+    state.meta.tasksCompletedToday = 0;
+  }
+  if (isDone) state.meta.tasksCompletedToday += 1;
+
+  if (last === today) {
+    // already counted today
+  } else if (last === yesterdayStr()) {
+    state.meta.currentStreak += 1;
+    state.meta.lastActiveDate = today;
+  } else {
+    state.meta.currentStreak = 1;
+    state.meta.lastActiveDate = today;
+  }
+
+  if (state.meta.currentStreak > state.meta.bestStreak) {
+    state.meta.bestStreak = state.meta.currentStreak;
+  }
+}
+
+/* ============ ACHIEVEMENTS ============ */
+function checkAchievements() {
+  const newlyUnlocked = [];
+  for (const a of ACHIEVEMENTS) {
+    if (!state.meta.achievementsUnlocked.includes(a.id) && a.check(state)) {
+      state.meta.achievementsUnlocked.push(a.id);
+      newlyUnlocked.push(a);
+    }
+  }
+  return newlyUnlocked;
+}
+
+function popAchievement(achievement) {
+  const el = document.getElementById('achievementPop');
+  el.innerHTML = `
+    <div class="achievement-pop-label">Logro desbloqueado</div>
+    <div class="achievement-pop-title">${escapeHTML(achievement.title)}</div>
+    <div class="achievement-pop-desc">${escapeHTML(achievement.desc)}</div>
+  `;
+  el.classList.add('show');
+  if (achievementTimer) clearTimeout(achievementTimer);
+  achievementTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+/* ============ CONFETTI ============ */
+function spawnConfetti(x, y, baseColor) {
+  const colors = [baseColor, '#FF6B35', '#F4A800', '#7C3AED', '#EC4899', '#06B6D4', '#25D366'];
+  const count = 24;
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = x + 'px';
+    piece.style.top = y + 'px';
+    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.6;
+    const velocity = 70 + Math.random() * 90;
+    piece.style.setProperty('--tx', Math.cos(angle) * velocity + 'px');
+    piece.style.setProperty('--ty', (Math.sin(angle) * velocity - 100) + 'px');
+    piece.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 1500);
+  }
+}
+
+/* ============ TOAST ============ */
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+/* ============ HELPERS ============ */
+function escapeHTML(str) {
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+/* ============ SVG ICONS ============ */
+const FLAME_SVG = `<svg class="flame" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 2 8 6.5 8 11C8 13 9 14.5 10.5 15C10 14 9.5 12.5 10 11C10.5 12 11.5 12.5 12 13C12.5 11 14 10 14 8C14 6 13 4 12 2Z" fill="#FF6B35"/><path d="M7 13C7 13 5 15 5 17.5C5 20.5 7.5 22 12 22C16.5 22 19 20.5 19 17.5C19 14 16 11 16 11C16 11 16.5 14 14.5 15.5C15 14 14.5 13 13.5 12.5C14 14 13 15 12 15.5C11 16 9.5 15.5 9 15C8 16 7 17 7 18C7 17 6.5 15 7 13Z" fill="#F4A800"/></svg>`;
+
+/* ============ RENDER ============ */
+function render() {
+  checkStreakDecay();
+
+  const overall = overallProgress(state);
+  const done = totalDone(state);
+  const ip = totalInProgress(state);
+  const total = totalTasks(state);
+  const level = currentLevel(overall);
+  const next = nextLevel(overall);
+  const unlocked = state.meta.achievementsUnlocked.length;
+
+  let html = `
+    <div class="masthead">
+      <div class="masthead-top">
+        <div class="project-info">
+          <div class="project-name">${escapeHTML(state.name)}</div>
+          <div class="project-subtitle">${escapeHTML(state.subtitle)}</div>
+        </div>
+        <div class="level-card">
+          <div class="level-label">Tu nivel</div>
+          <div class="level-name">${escapeHTML(level.name)}</div>
+          ${next ? `<div class="level-next">siguiente: ${escapeHTML(next.name)} en ${next.min - overall}%</div>` : `<div class="level-next">nivel máximo alcanzado</div>`}
+        </div>
+      </div>
+
+      <div class="progress-hero">
+        <div class="progress-main">
+          <div class="progress-numbers">
+            <div class="progress-big">${overall}<span class="pct">%</span></div>
+          </div>
+          <div class="progress-counts">${done} completadas · ${ip} en curso · ${total} totales</div>
+          <div class="progress-bar-big"><div class="progress-bar-big-fill" style="width:${overall}%"></div></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-label">Racha actual</div>
+            <div class="stat-value">${FLAME_SVG}${state.meta.currentStreak}<span class="unit">${state.meta.currentStreak === 1 ? 'día' : 'días'}</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Mejor racha</div>
+            <div class="stat-value">${state.meta.bestStreak}<span class="unit">${state.meta.bestStreak === 1 ? 'día' : 'días'}</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Hoy</div>
+            <div class="stat-value">${state.meta.tasksCompletedToday}<span class="unit">${state.meta.tasksCompletedToday === 1 ? 'tarea' : 'tareas'}</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Logros</div>
+            <div class="stat-value">${unlocked}<span class="unit">/ ${ACHIEVEMENTS.length}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="achievements-section">
+        <div class="achievements-header">
+          <div class="achievements-title">Logros</div>
+          <div class="achievements-count">${unlocked} de ${ACHIEVEMENTS.length} desbloqueados</div>
+        </div>
+        <div class="achievements-list">
+          ${ACHIEVEMENTS.map(a => {
+            const isUnlocked = state.meta.achievementsUnlocked.includes(a.id);
+            return `
+              <div class="badge" data-unlocked="${isUnlocked}" title="${escapeHTML(a.desc)}">
+                <span class="dot" style="background:${isUnlocked ? '#FF6B35' : 'var(--border-strong)'}"></span>
+                ${escapeHTML(a.title)}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="phases">
+  `;
+
+  state.phases.forEach(phase => {
+    const pProgress = phaseProgress(phase);
+    const pDone = phase.tasks.filter(t => t.status === 'done').length;
+    const isComplete = pProgress === 100;
+
+    html += `
+      <div class="phase" data-phase-id="${phase.id}" data-collapsed="${phase.collapsed ? 'true' : 'false'}" data-complete="${isComplete}" style="--phase-color: ${phase.color}">
+        <div class="phase-header" onclick="togglePhase('${phase.id}')">
+          <div class="phase-info">
+            <div class="phase-label"><span class="label-dot"></span>${escapeHTML(phase.number)}</div>
+            <div class="phase-title">${escapeHTML(phase.title)}<span class="toggle-caret">▾</span></div>
+            <div class="phase-subtitle">${escapeHTML(phase.subtitle)}</div>
+            ${isComplete ? `<div class="phase-complete-badge">Completada</div>` : ''}
+          </div>
+          <div class="phase-stat">
+            <div class="phase-pct-big">${pProgress}<span class="pct-symbol">%</span></div>
+            <div class="phase-count">${pDone} / ${phase.tasks.length} tareas</div>
+            <div class="phase-bar"><div class="phase-bar-fill" style="width:${pProgress}%"></div></div>
+          </div>
+        </div>
+        <div class="task-list">
+    `;
+
+    phase.tasks.forEach(task => {
+      html += `
+        <div class="task" data-status="${task.status}" data-task-id="${task.id}">
+          <div class="task-indicator" onclick="event.stopPropagation(); cycleStatus('${phase.id}', '${task.id}', event)" title="cambiar estado"></div>
+          <div class="task-text" onclick="editTask('${phase.id}', '${task.id}')">${escapeHTML(task.title)}</div>
+          <div class="task-actions">
+            <button class="task-action" onclick="event.stopPropagation(); deleteTask('${phase.id}', '${task.id}')">borrar</button>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+        <div class="add-task-row">
+          <button class="add-task-btn" onclick="showAddTask('${phase.id}')">+ agregar tarea</button>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `
+    </div>
+    <div class="add-phase-row">
+      <button class="add-phase-btn" onclick="addPhase()">+ agregar fase nueva</button>
+    </div>
+    <div class="footer">
+      <div>actualizado · ${new Date().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+      <div class="footer-actions">
+        <button class="footer-btn" onclick="exportData()">exportar json</button>
+        <label class="footer-btn" style="cursor:pointer">
+          importar json
+          <input type="file" accept="application/json" style="display:none" onchange="importData(event)">
+        </label>
+        <button class="footer-btn" onclick="resetToSeed()">restablecer</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('content').innerHTML = html;
+}
+
+/* ============ ACTIONS ============ */
+window.togglePhase = function(phaseId) {
+  const phase = state.phases.find(p => p.id === phaseId);
+  if (phase) {
+    phase.collapsed = !phase.collapsed;
+    saveState();
+    render();
+  }
+};
+
+window.cycleStatus = function(phaseId, taskId, event) {
+  const phase = state.phases.find(p => p.id === phaseId);
+  const task = phase?.tasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  const wasDone = task.status === 'done';
+  const cycle = { 'pending': 'in_progress', 'in_progress': 'done', 'done': 'pending' };
+  task.status = cycle[task.status] || 'pending';
+  const becameDone = task.status === 'done';
+
+  if (becameDone) {
+    recordActivity(true);
+    // Confetti from click position
+    if (event) {
+      spawnConfetti(event.clientX, event.clientY, phase.color);
+    }
+    // Check if phase just got completed
+    if (phaseComplete(state, phase.id)) {
+      setTimeout(() => {
+        const phaseEl = document.querySelector(`[data-phase-id="${phaseId}"]`);
+        if (phaseEl) {
+          phaseEl.classList.add('celebrating');
+          const rect = phaseEl.getBoundingClientRect();
+          spawnConfetti(rect.left + rect.width / 2, rect.top + 40, phase.color);
+          setTimeout(() => phaseEl.classList.remove('celebrating'), 1000);
+        }
+        showToast(`¡Fase completada: ${phase.title}!`);
+      }, 300);
+    }
+  } else if (wasDone) {
+    // Undoing a completion — decrement today's counter if applicable
+    if (state.meta.tasksCompletedToday > 0) state.meta.tasksCompletedToday -= 1;
+  }
+
+  const newAchievements = checkAchievements();
+  saveState();
+  render();
+
+  // Show achievement pop after render
+  if (newAchievements.length > 0) {
+    setTimeout(() => popAchievement(newAchievements[0]), 400);
+  }
+};
+
+window.editTask = function(phaseId, taskId) {
+  const phase = state.phases.find(p => p.id === phaseId);
+  const task = phase?.tasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  const taskEl = document.querySelector(`[data-task-id="${taskId}"]`);
+  if (!taskEl) return;
+  const textEl = taskEl.querySelector('.task-text');
+
+  const input = document.createElement('input');
+  input.className = 'task-edit-input';
+  input.value = task.title;
+
+  textEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  let finished = false;
+  const finish = (save) => {
+    if (finished) return;
+    finished = true;
+    if (save && input.value.trim()) {
+      task.title = input.value.trim();
+      saveState();
+    }
+    render();
+  };
+
+  input.addEventListener('blur', () => finish(true));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+    if (e.key === 'Escape') { finish(false); }
+  });
+};
+
+window.deleteTask = function(phaseId, taskId) {
+  if (!confirm('¿Eliminar esta tarea?')) return;
+  const phase = state.phases.find(p => p.id === phaseId);
+  if (!phase) return;
+  phase.tasks = phase.tasks.filter(t => t.id !== taskId);
+  saveState();
+  render();
+};
+
+window.showAddTask = function(phaseId) {
+  const phase = state.phases.find(p => p.id === phaseId);
+  if (!phase) return;
+  if (phase.collapsed) {
+    phase.collapsed = false;
+    render();
+  }
+  setTimeout(() => {
+    const phaseEl = document.querySelector(`[data-phase-id="${phaseId}"]`);
+    if (!phaseEl) return;
+    const addRow = phaseEl.querySelector('.add-task-row');
+    addRow.innerHTML = `<input class="add-task-input" placeholder="describe la tarea y presiona enter" />`;
+    const input = addRow.querySelector('input');
+    input.focus();
+    let finished = false;
+    const finish = (save) => {
+      if (finished) return;
+      finished = true;
+      if (save && input.value.trim()) {
+        phase.tasks.push({
+          id: `t-${Date.now()}-${Math.floor(Math.random()*1000)}`,
+          title: input.value.trim(),
+          status: 'pending'
+        });
+        saveState();
+        showToast('tarea agregada');
+      }
+      render();
+    };
+    input.addEventListener('blur', () => finish(true));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+      if (e.key === 'Escape') { finish(false); }
+    });
+  }, 50);
+};
+
+window.addPhase = function() {
+  const title = prompt('Título de la nueva fase:');
+  if (!title || !title.trim()) return;
+  const subtitle = prompt('Subtítulo (opcional):') || '';
+  const number = prompt('Etiqueta de la fase (ej. "Fase D"):') || `Fase ${state.phases.length + 1}`;
+  const colors = ['#FF6B35', '#25D366', '#F4A800', '#7C3AED', '#EC4899', '#06B6D4'];
+  const color = colors[state.phases.length % colors.length];
+
+  state.phases.push({
+    id: `phase-${Date.now()}`,
+    number: number.trim(),
+    title: title.trim(),
+    subtitle: subtitle.trim(),
+    color: color,
+    collapsed: false,
+    tasks: []
+  });
+  saveState();
+  render();
+  showToast('fase agregada');
+};
+
+window.exportData = function() {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `proyecto-carniceria-${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('json exportado');
+};
+
+window.importData = function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!confirm('¿Reemplazar el estado actual con el contenido de este archivo?')) {
+    event.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.phases || !Array.isArray(data.phases)) throw new Error('Estructura inválida');
+      state = data;
+      if (!state.meta) state.meta = { lastActiveDate: null, currentStreak: 0, bestStreak: 0, achievementsUnlocked: [], tasksCompletedToday: 0, todayDate: null };
+      await saveState();
+      render();
+      showToast('importado correctamente');
+    } catch (err) {
+      alert('No pude leer ese archivo. ¿Estás seguro que es un JSON válido?');
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+};
+
+window.resetToSeed = async function() {
+  if (!confirm('¿Restablecer el proyecto a su estado inicial? Esto borrará todo tu progreso actual.')) return;
+  state = JSON.parse(JSON.stringify(SEED_PROJECT));
+  await saveState();
+  render();
+  showToast('proyecto restablecido');
+};
+
+/* ============ INIT ============ */
+(async function init() {
+  state = await loadState();
+  // Run initial achievement check (for any seeded done tasks)
+  checkAchievements();
+  render();
+})();
+</script>
+</body>
+</html>
