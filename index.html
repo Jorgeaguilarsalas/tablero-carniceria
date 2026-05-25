@@ -813,6 +813,205 @@
     animation: phasePulse 1s ease-out;
   }
 
+  /* ==== Patch Modal ==== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(31, 22, 18, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    padding: 20px;
+  }
+
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal-content {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 32px;
+    max-width: 620px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    transform: scale(0.94) translateY(10px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .modal-overlay.show .modal-content {
+    transform: scale(1) translateY(0);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .modal-title {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 30px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 28px;
+    color: var(--text-muted);
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .modal-desc {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 20px;
+    line-height: 1.55;
+  }
+
+  .modal-textarea {
+    width: 100%;
+    min-height: 160px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    line-height: 1.5;
+  }
+
+  .modal-textarea:focus {
+    border-color: #FF6B35;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #FF6B35 12%, transparent);
+  }
+
+  .modal-preview {
+    margin-top: 16px;
+    padding: 16px 18px;
+    background: var(--bg);
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .modal-preview.error {
+    background: color-mix(in srgb, #E24B4A 8%, var(--bg));
+    border-color: color-mix(in srgb, #E24B4A 30%, var(--border));
+    color: #971A1A;
+  }
+
+  .modal-preview-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .modal-preview ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .modal-preview li {
+    padding: 6px 0;
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .modal-preview li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #FF6B35;
+    font-weight: 600;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .modal-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid;
+  }
+
+  .modal-btn-secondary {
+    background: var(--surface);
+    color: var(--text-secondary);
+    border-color: var(--border);
+  }
+
+  .modal-btn-secondary:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+
+  .modal-btn-primary {
+    background: linear-gradient(135deg, #FF6B35 0%, #EC4899 100%);
+    color: #FFFFFF;
+    border-color: transparent;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .modal-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .modal-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--border-strong);
+    box-shadow: none;
+  }
+
+  .footer-btn-primary {
+    background: linear-gradient(135deg, #FF6B35 0%, #EC4899 100%) !important;
+    color: #FFFFFF !important;
+    border-color: transparent !important;
+    font-weight: 600;
+  }
+
+  .footer-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
   @media (max-width: 760px) {
     .app { padding: 28px 20px 60px; }
     .masthead-top { flex-direction: column; }
@@ -835,6 +1034,23 @@
 </div>
 <div class="toast" id="toast"></div>
 <div class="achievement-pop" id="achievementPop"></div>
+
+<div class="modal-overlay" id="patchModal" onclick="if(event.target===this)closePatchModal()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">Aplicar actualización de Claude</div>
+      <button class="modal-close" onclick="closePatchModal()" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-desc">Pega aquí el JSON que Claude te dio al final del chat. Te muestro una vista previa de los cambios antes de aplicar nada.</div>
+    <textarea class="modal-textarea" id="patchInput" placeholder='{"type": "claude_update", "actions": [...]}' spellcheck="false"></textarea>
+    <div class="modal-preview" id="patchPreview" style="display:none;"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="closePatchModal()">Cancelar</button>
+      <button class="modal-btn modal-btn-secondary" onclick="previewPatch()">Vista previa</button>
+      <button class="modal-btn modal-btn-primary" id="applyPatchBtn" onclick="applyPatch()" disabled>Aplicar cambios</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const STORAGE_KEY = 'butcher-project:state-v2';
@@ -1352,6 +1568,7 @@ function render() {
     <div class="footer">
       <div>actualizado · ${new Date().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })}</div>
       <div class="footer-actions">
+        <button class="footer-btn footer-btn-primary" onclick="openPatchModal()">aplicar actualización de claude</button>
         <button class="footer-btn" onclick="exportData()">exportar json</button>
         <label class="footer-btn" style="cursor:pointer">
           importar json
@@ -1565,6 +1782,204 @@ window.resetToSeed = async function() {
   await saveState();
   render();
   showToast('proyecto restablecido');
+};
+
+/* ============ PATCH SYSTEM ============ */
+let pendingPatch = null;
+
+function findTaskInState(taskId) {
+  for (const phase of state.phases) {
+    const task = phase.tasks.find(t => t.id === taskId);
+    if (task) return { task, phase };
+  }
+  return null;
+}
+
+function describePatchAction(action) {
+  switch (action.action) {
+    case 'set_status': {
+      const found = findTaskInState(action.taskId);
+      const taskName = found ? found.task.title : `(tarea no encontrada: ${action.taskId})`;
+      const statusLabels = { done: 'completada', in_progress: 'en curso', pending: 'pendiente' };
+      const label = statusLabels[action.status] || action.status;
+      return `Marcar como <strong>${label}</strong>: "${escapeHTML(taskName)}"`;
+    }
+    case 'add_task': {
+      const phase = state.phases.find(p => p.id === action.phaseId);
+      const phaseName = phase ? phase.title : `(fase no encontrada: ${action.phaseId})`;
+      const statusNote = action.status === 'done' ? ' <em>(ya completada)</em>' : action.status === 'in_progress' ? ' <em>(en curso)</em>' : '';
+      return `Agregar a <strong>${escapeHTML(phaseName)}</strong>: "${escapeHTML(action.title)}"${statusNote}`;
+    }
+    case 'update_task': {
+      const found = findTaskInState(action.taskId);
+      const oldTitle = found ? found.task.title : '(tarea no encontrada)';
+      return `Renombrar: "${escapeHTML(oldTitle)}" → "${escapeHTML(action.newTitle)}"`;
+    }
+    case 'remove_task': {
+      const found = findTaskInState(action.taskId);
+      const taskName = found ? found.task.title : `(tarea no encontrada: ${action.taskId})`;
+      return `Eliminar: "${escapeHTML(taskName)}"`;
+    }
+    case 'add_phase':
+      return `Crear nueva fase: <strong>${escapeHTML(action.title)}</strong>`;
+    default:
+      return `Acción desconocida: ${escapeHTML(action.action || 'sin tipo')}`;
+  }
+}
+
+window.openPatchModal = function() {
+  document.getElementById('patchModal').classList.add('show');
+  document.getElementById('patchInput').value = '';
+  document.getElementById('patchPreview').style.display = 'none';
+  document.getElementById('patchPreview').classList.remove('error');
+  document.getElementById('applyPatchBtn').disabled = true;
+  pendingPatch = null;
+  setTimeout(() => document.getElementById('patchInput').focus(), 200);
+};
+
+window.closePatchModal = function() {
+  document.getElementById('patchModal').classList.remove('show');
+  pendingPatch = null;
+};
+
+window.previewPatch = function() {
+  const text = document.getElementById('patchInput').value.trim();
+  const previewEl = document.getElementById('patchPreview');
+  const applyBtn = document.getElementById('applyPatchBtn');
+
+  if (!text) {
+    previewEl.classList.add('error');
+    previewEl.innerHTML = '<div class="modal-preview-title">Error</div>Pega un JSON primero.';
+    previewEl.style.display = 'block';
+    applyBtn.disabled = true;
+    return;
+  }
+
+  try {
+    const patch = JSON.parse(text);
+    if (patch.type !== 'claude_update') {
+      throw new Error('El JSON no tiene "type": "claude_update".');
+    }
+    if (!Array.isArray(patch.actions) || patch.actions.length === 0) {
+      throw new Error('El JSON no tiene un arreglo "actions" con al menos una acción.');
+    }
+    pendingPatch = patch;
+
+    let html = '<div class="modal-preview-title">';
+    html += patch.summary ? `Resumen: ${escapeHTML(patch.summary)}` : `${patch.actions.length} ${patch.actions.length === 1 ? 'cambio' : 'cambios'}`;
+    html += '</div><ul>';
+    patch.actions.forEach(action => {
+      html += `<li>${describePatchAction(action)}</li>`;
+    });
+    html += '</ul>';
+
+    previewEl.classList.remove('error');
+    previewEl.innerHTML = html;
+    previewEl.style.display = 'block';
+    applyBtn.disabled = false;
+  } catch (e) {
+    previewEl.classList.add('error');
+    previewEl.innerHTML = `<div class="modal-preview-title">JSON inválido</div>${escapeHTML(e.message)}`;
+    previewEl.style.display = 'block';
+    applyBtn.disabled = true;
+    pendingPatch = null;
+  }
+};
+
+window.applyPatch = async function() {
+  if (!pendingPatch) return;
+  let applied = 0;
+  let doneCount = 0;
+
+  pendingPatch.actions.forEach(action => {
+    switch (action.action) {
+      case 'set_status': {
+        const found = findTaskInState(action.taskId);
+        if (found && ['pending', 'in_progress', 'done'].includes(action.status)) {
+          const wasDone = found.task.status === 'done';
+          found.task.status = action.status;
+          if (action.status === 'done' && !wasDone) doneCount++;
+          applied++;
+        }
+        break;
+      }
+      case 'add_task': {
+        const phase = state.phases.find(p => p.id === action.phaseId);
+        if (phase && action.title) {
+          phase.tasks.push({
+            id: action.taskId || `t-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+            title: action.title,
+            status: ['pending', 'in_progress', 'done'].includes(action.status) ? action.status : 'pending'
+          });
+          if (action.status === 'done') doneCount++;
+          applied++;
+        }
+        break;
+      }
+      case 'update_task': {
+        const found = findTaskInState(action.taskId);
+        if (found && action.newTitle) {
+          found.task.title = action.newTitle;
+          applied++;
+        }
+        break;
+      }
+      case 'remove_task': {
+        for (const phase of state.phases) {
+          const idx = phase.tasks.findIndex(t => t.id === action.taskId);
+          if (idx !== -1) {
+            phase.tasks.splice(idx, 1);
+            applied++;
+            break;
+          }
+        }
+        break;
+      }
+      case 'add_phase': {
+        if (action.title) {
+          const colors = ['#FF6B35', '#25D366', '#F4A800', '#7C3AED', '#EC4899', '#06B6D4'];
+          state.phases.push({
+            id: action.phaseId || `phase-${Date.now()}`,
+            number: action.number || `Fase ${state.phases.length + 1}`,
+            title: action.title,
+            subtitle: action.subtitle || '',
+            color: action.color || colors[state.phases.length % colors.length],
+            collapsed: false,
+            tasks: []
+          });
+          applied++;
+        }
+        break;
+      }
+    }
+  });
+
+  // Record activity if any tasks were completed
+  if (doneCount > 0) {
+    for (let i = 0; i < doneCount; i++) recordActivity(true);
+  }
+
+  const newAchievements = checkAchievements();
+  await saveState();
+  closePatchModal();
+  render();
+  showToast(`${applied} ${applied === 1 ? 'cambio aplicado' : 'cambios aplicados'}`);
+
+  if (newAchievements.length > 0) {
+    setTimeout(() => popAchievement(newAchievements[0]), 700);
+  }
+
+  // Celebrate any newly completed phases
+  setTimeout(() => {
+    state.phases.forEach(phase => {
+      if (phaseComplete(state, phase.id)) {
+        const phaseEl = document.querySelector(`[data-phase-id="${phase.id}"]`);
+        if (phaseEl && !phaseEl.classList.contains('celebrated')) {
+          // Mark so we don't celebrate twice
+        }
+      }
+    });
+  }, 100);
 };
 
 /* ============ INIT ============ */
